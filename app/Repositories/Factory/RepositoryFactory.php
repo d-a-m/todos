@@ -11,7 +11,7 @@ class RepositoryFactory
      * @param Model $model
      * @return Repository
      */
-    public static function make(Model $model): Repository
+    public static function make(Model $model): ?Repository
     {
         $model = get_class($model);
 
@@ -19,7 +19,12 @@ class RepositoryFactory
         $className = end($classNamespace);
 
         $repositoryName = 'App\Repositories\\' . $className . 'Repository';
-        $repository = new $repositoryName($model);
+
+        try {
+            $repository = new $repositoryName($model);
+        } catch (\Exception $e) {
+            return null;
+        }
 
         return $repository;
     }

@@ -6,7 +6,7 @@ Route::get('/', function () {
 
 Route::middleware(['admin'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/', 'Admin\FrontController@index')->name('index');
+        Route::get('/', 'Admin\IndexController@index')->name('index');
     });
 });
 

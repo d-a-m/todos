@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 
-class FrontController extends Controller
+class IndexController extends Controller
 {
     public function index()
     {

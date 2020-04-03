@@ -15,8 +15,6 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        UpdateRating::class,
-        GenerateDailyWords::class
     ];
 
     /**
@@ -24,10 +22,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('rating:update')
-            ->everyThirtyMinutes();
-        $schedule->command('dailywords:generate')
-            ->cron('0 0 * * *');
     }
 
     /**
