@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use phpDocumentor\Reflection\Types\Boolean;
 
 /**
  * Class WordController
@@ -81,7 +82,7 @@ class TodoController extends ApiController
 
         $items = FactoryTransformers::make('todo')->transformCollection($rawItems);
 
-       return $this->respond([
+        return $this->respond([
             'response' => [
                 'items' => $items,
                 'count' => $user->todos()->count()
@@ -117,12 +118,14 @@ class TodoController extends ApiController
             return $this->respondNotFound('User has not been found!');
         }
 
-
-
         $todo = $this->todoRepo->getById($todoId);
 
         if (!$todo) {
             return $this->respondNotFound('Todo has not been found!');
+        }
+
+        if (!$this->isAllowOperation($todo, $user)) {
+            return $this->respondBadRequest();
         }
 
         $isDelegated = $this->todoService->_update($todo, [
@@ -170,7 +173,7 @@ class TodoController extends ApiController
 
         $validator = Validator::make($params, (new TodoRequest())->rules());
 
-        if (! $validator->fails()) {
+        if (!$validator->fails()) {
 
             $isAdded = $this->todoService->_create($params);
 
@@ -221,6 +224,10 @@ class TodoController extends ApiController
             return $this->respondNotFound('Todo has not been found!');
         }
 
+        if (!$this->isAllowOperation($todo, $user)) {
+            return $this->respondBadRequest();
+        }
+
         $params = [
             'title' => $title,
             'description' => $description,
@@ -228,7 +235,7 @@ class TodoController extends ApiController
 
         $validator = Validator::make($params, (new TodoRequest())->rules());
 
-        if (! $validator->fails()) {
+        if (!$validator->fails()) {
 
             $isEdited = $this->todoService->_update($todo, $params);
 
@@ -278,6 +285,10 @@ class TodoController extends ApiController
             return $this->respondNotFound('Todo has not been found!');
         }
 
+        if (!$this->isAllowOperation($todo, $user)) {
+            return $this->respondBadRequest();
+        }
+
         $isDeleted = $this->todoService->delete($todo);
 
         return $this->respond([
@@ -287,6 +298,14 @@ class TodoController extends ApiController
         ]);
     }
 
-
+    /**
+     * @param  User  $user
+     * @param  Todo  $todo
+     * @return bool
+     */
+    private function isAllowOperation(User $user, Todo $todo): Boolean
+    {
+        return $user->id === $todo->user_id ? true : false;
+    }
 
 }
