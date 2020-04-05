@@ -8,6 +8,7 @@ Route::middleware('api')->group(function () {
         Route::put('delegate-todo', 'Api\TodoController@delegateTodo');
 
         Route::post('add', 'Api\TodoController@addTodo');
+        Route::patch('edit', 'Api\TodoController@editTodo');
     });
 
     Route::group(['prefix' => 'users'], function (){

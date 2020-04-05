@@ -14,6 +14,10 @@
                 <todo-add></todo-add>
             </section>
 
+            <section v-if="checkPanel('todo-edit')">
+                <todo-edit></todo-edit>
+            </section>
+
             <div class="mb-5 mt-1 text-center" v-if="this.isLoadingPage">
                 <span class="loading"></span>
             </div>
@@ -23,11 +27,12 @@
 </template>
 
 <script>
-    import TodoList from "../components/TodoList";
-    import TodoItem from "../components/TodoItem";
+    import TodoList from "./TodoList";
+    import TodoItem from "./TodoItem";
     import TodoAdd from "./TodoAdd";
+    import TodoEdit from "./TodoEdit";
     export default {
-        components: {TodoAdd, TodoItem, TodoList},
+        components: {TodoEdit, TodoAdd, TodoItem, TodoList},
         data: function () {
             return {
                 isLoadingPage: false,
@@ -42,6 +47,10 @@
             this.$root.$on('addTodo', () => {
                 this.addTodo();
             });
+
+            this.$root.$on('editTodo', (data) => {
+                this.editTodo(data);
+            });
         },
         methods: {
             checkPanel(panel) {
@@ -51,6 +60,12 @@
             showTodo: function (data) {
                 this.$store.commit('setLastActivePanel', 'home');
                 this.$store.commit('setActivePanel', 'todo');
+                this.$store.commit('setTodo', data['data']);
+            },
+
+            editTodo: function (data) {
+                this.$store.commit('setLastActivePanel', 'home');
+                this.$store.commit('setActivePanel', 'todo-edit');
                 this.$store.commit('setTodo', data['data']);
             },
 

@@ -27,7 +27,7 @@
 
 <script>
     import axios from 'axios';
-    import TodoListItem from "./TodoListItem";
+    import TodoListItem from "../components/TodoListItem";
 
     export default {
         name: "TodoList",

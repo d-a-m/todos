@@ -187,5 +187,62 @@ class TodoController extends ApiController
     }
 
 
+    /**
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function editTodo(Request $request)
+    {
+        $input = $request->all();
+
+        if (!$input) {
+            return $this->respondBadRequest();
+        }
+
+        $todoId = (int) filter_var($input['todoId'], FILTER_SANITIZE_NUMBER_INT);
+        $title = filter_var($input['title'], FILTER_SANITIZE_STRING);
+        $description = filter_var($input['description'], FILTER_SANITIZE_STRING);
+        $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
+
+        if (!$token) {
+            return $this->respondUnauthorized();
+        }
+
+        $user = $this->userRepo->getByField('api_token', $token);
+
+        if (!$user) {
+            return $this->respondNotFound('User has not been found!');
+        }
+
+        $todo = $this->todoRepo->getById($todoId);
+
+        if (!$todo) {
+            return $this->respondNotFound('Todo has not been found!');
+        }
+
+        $params = [
+            'title' => $title,
+            'description' => $description,
+        ];
+
+        $validator = Validator::make($params, (new TodoRequest())->rules());
+
+        if (! $validator->fails()) {
+
+            $isEdited = $this->todoService->_update($todo, $params);
+
+            return $this->respond([
+                'response' => [
+                    'is_edited' => $isEdited,
+                ]
+            ]);
+        }
+
+        return $this->respond([
+            'response' => [
+                'is_edited' => false,
+            ]
+        ]);
+    }
 
 }

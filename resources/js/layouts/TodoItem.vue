@@ -25,6 +25,10 @@
                         </button>
                     </div>
 
+                    <button class="btn btn-default btn-block mt-3" @click="editTodo">
+                        Редактировать задачу
+                    </button>
+
                 </div>
 
                 <div v-if="is_delegated">
@@ -47,7 +51,7 @@
 
 <script>
     import axios from 'axios';
-    import BackLink from "./BackLink";
+    import BackLink from "../components/BackLink";
 
     export default {
         name: "TodoItem",
@@ -92,7 +96,7 @@
                     });
             },
 
-            delegateTodo: function () {
+            delegateTodo() {
                 let endpoint = '/api/todos/delegate-todo';
                 let token = document.querySelector('meta[name="api-token"]').getAttribute('content');
                 let usersInput = document.querySelector('select[name="users"]');
@@ -123,6 +127,12 @@
                     .catch(error => {
                         console.log('Error: ', error);
                     });
+            },
+
+            editTodo() {
+                this.$root.$emit('editTodo', {
+                    data: this.todo
+                });
             }
         }
     }
