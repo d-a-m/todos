@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
 
 class Todo extends Model
 {
@@ -34,13 +33,4 @@ class Todo extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * @return \Illuminate\Support\Collection
-     */
-    public function transferredScope()
-    {
-        return DB::table('transferred_todo')
-            ->where('todo_id', '=', $this->id)
-            ->get();
-    }
 }

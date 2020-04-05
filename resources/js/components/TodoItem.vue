@@ -2,7 +2,7 @@
     <div>
         <div class="row mb-4">
             <div class="col todo-item-list">
-                <div v-if="! delegated">
+                <div v-if="! is_delegated">
                     <h5>{{ this.todo.title }}</h5>
 
                     <p class="text-muted mb-0">Описание задачи:</p>
@@ -14,7 +14,7 @@
                     <p class="text-muted mb-0 mt-3">Дата обновления:</p>
                     <p class="small">{{ this.todo.updated_at }}</p>
 
-                    <div v-if="! userLoading && ! delegated">
+                    <div v-if="! userLoading && ! is_delegated">
                         <p class="mb-0 mt-3">Делегировать задачу</p>
                         <select name="users" class="form-control">
                             <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }} #{{ user.id }}</option>
@@ -27,7 +27,7 @@
 
                 </div>
 
-                <div v-if="delegated">
+                <div v-if="is_delegated">
                     <div class="alert alert-success">
                         <p>Задача успешно делегирована!</p>
                         <p class="small mb-0">Через 3 секунды вернёмся к списку задач.</p>
@@ -58,7 +58,7 @@
                 users: [],
 
                 userLoading: false,
-                delegated: false
+                is_delegated: false
             }
         },
         mounted() {
@@ -75,7 +75,9 @@
 
                 this.userLoading = true;
 
-                axios.post(endpoint, data)
+                axios.get(endpoint, {
+                    params: data
+                })
                     .then((result => {
                         let items = result['data']['response']['items'];
 
@@ -104,10 +106,10 @@
 
                 this.userLoading = true;
 
-                axios.post(endpoint, data)
+                axios.put(endpoint, data)
                     .then((result => {
                         let is_delegated = result['data']['response']['is_delegated'];
-                        this.delegated = !!is_delegated;
+                        this.is_delegated = !!is_delegated;
                         this.userLoading = false;
 
                         if (is_delegated) {

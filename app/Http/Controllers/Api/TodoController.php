@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Api\Transformers\FactoryTransformers;
+use App\Http\Requests\TodoRequest;
 use App\Models\Todo;
 use App\Models\User;
 use App\Repositories\Contract\Repository;
@@ -11,6 +12,7 @@ use App\Services\TodoService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class WordController
@@ -87,6 +89,7 @@ class TodoController extends ApiController
         ]);
     }
 
+
     /**
      * @param  Request  $request
      * @return JsonResponse
@@ -130,6 +133,59 @@ class TodoController extends ApiController
             ]
         ]);
     }
+
+    /**
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function addTodo(Request $request)
+    {
+        $input = $request->all();
+
+        if (!$input) {
+            return $this->respondBadRequest();
+        }
+
+        $title = filter_var($input['title'], FILTER_SANITIZE_STRING);
+        $description = filter_var($input['description'], FILTER_SANITIZE_STRING);
+        $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
+
+        if (!$token) {
+            return $this->respondUnauthorized();
+        }
+
+        $user = $this->userRepo->getByField('api_token', $token);
+
+        if (!$user) {
+            return $this->respondNotFound('User has not been found!');
+        }
+
+        $params = [
+            'title' => $title,
+            'description' => $description,
+            'user_id' => $user->id,
+        ];
+
+        $validator = Validator::make($params, (new TodoRequest())->rules());
+
+        if (! $validator->fails()) {
+
+            $isAdded = $this->todoService->_create($params);
+
+            return $this->respond([
+                'response' => [
+                    'is_added' => $isAdded,
+                ]
+            ]);
+        }
+
+        return $this->respond([
+            'response' => [
+                'is_added' => false,
+            ]
+        ]);
+    }
+
 
 
 }

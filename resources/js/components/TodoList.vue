@@ -5,7 +5,7 @@
         <div v-if="todos.length > 0">
             <todo-list-item :todo="todo" :key="todo.id" v-for="todo in todos"></todo-list-item>
 
-            <div class="text-center mb-5" v-if="visibleNextBtn && ! isLoadingTodos">
+            <div class="text-center mb-3" v-if="visibleNextBtn && ! isLoadingTodos">
                 <button class="btn btn-default btn-block" @click="getTodos">Загрузить ещё</button>
             </div>
         </div>
@@ -13,6 +13,10 @@
         <div v-if="todos.length === 0 && ! isLoadingTodos" class="text-center">
             <p>Список задач пуст.</p>
         </div>
+
+        <button class="btn btn-success btn-block" @click="addTodo">
+            Добавить задачу
+        </button>
 
         <div class="mb-5 mt-1 text-center" v-if="isLoadingTodos">
             <span class="loading"></span>
@@ -56,7 +60,9 @@
 
                 this.isLoadingTodos = true;
 
-                axios.post(endpoint, data)
+                axios.get(endpoint, {
+                    params: data
+                })
                     .then((result => {
                         let items = result['data']['response']['items'];
                         let count = result['data']['response']['count'];
@@ -77,6 +83,10 @@
                 todos.forEach((item) => {
                     this.todos.push(item);
                 });
+            },
+
+            addTodo() {
+                this.$root.$emit('addTodo');
             },
         }
     }
