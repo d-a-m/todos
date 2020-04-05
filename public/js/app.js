@@ -2168,7 +2168,7 @@ __webpack_require__.r(__webpack_exports__);
         'api_token': token,
         'title': title,
         'description': description,
-        'todoId': this.todo.id
+        'todo_id': this.todo.id
       };
       this.loading = true;
       axios__WEBPACK_IMPORTED_MODULE_0___default.a.patch(endpoint, data).then(function (result) {
@@ -2255,6 +2255,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2267,7 +2278,9 @@ __webpack_require__.r(__webpack_exports__);
       todo: '',
       users: [],
       userLoading: false,
-      is_delegated: false
+      deletedLoading: false,
+      is_delegated: false,
+      is_deleted: false
     };
   },
   mounted: function mounted() {
@@ -2319,6 +2332,34 @@ __webpack_require__.r(__webpack_exports__);
             _this2.$store.commit('setLastActivePanel', 'todo');
 
             _this2.$store.commit('setActivePanel', 'home');
+          }, 3000);
+        }
+      })["catch"](function (error) {
+        console.log('Error: ', error);
+      });
+    },
+    deleteTodo: function deleteTodo() {
+      var _this3 = this;
+
+      var endpoint = '/api/todos/delete';
+      var token = document.querySelector('meta[name="api-token"]').getAttribute('content');
+      var data = {
+        'api_token': token,
+        'todo_id': this.$store.state.todo.id
+      };
+      this.deletedLoading = true;
+      axios__WEBPACK_IMPORTED_MODULE_0___default.a["delete"](endpoint, {
+        params: data
+      }).then(function (result) {
+        var is_deleted = result['data']['response']['is_deleted'];
+        _this3.is_deleted = !!is_deleted;
+        _this3.deletedLoading = false;
+
+        if (is_deleted) {
+          setTimeout(function () {
+            _this3.$store.commit('setLastActivePanel', 'todo');
+
+            _this3.$store.commit('setActivePanel', 'home');
           }, 3000);
         }
       })["catch"](function (error) {
@@ -3958,7 +3999,7 @@ var render = function() {
         "div",
         { staticClass: "col todo-item-list" },
         [
-          !_vm.is_delegated
+          !_vm.is_delegated && !_vm.is_deleted
             ? _c("div", [
                 _c("h5", [_vm._v(_vm._s(this.todo.title))]),
                 _vm._v(" "),
@@ -4032,19 +4073,36 @@ var render = function() {
                       "\n                    Редактировать задачу\n                "
                     )
                   ]
-                )
+                ),
+                _vm._v(" "),
+                !_vm.deletedLoading
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-danger btn-block mt-3",
+                        on: { click: _vm.deleteTodo }
+                      },
+                      [
+                        _vm._v(
+                          "\n                    Удалить задачу\n                "
+                        )
+                      ]
+                    )
+                  : _vm._e()
               ])
             : _vm._e(),
           _vm._v(" "),
           _vm.is_delegated ? _c("div", [_vm._m(0)]) : _vm._e(),
           _vm._v(" "),
-          _c("back-link"),
+          _vm.is_deleted ? _c("div", [_vm._m(1)]) : _vm._e(),
           _vm._v(" "),
-          _vm.userLoading
+          _vm.userLoading || _vm.deletedLoading
             ? _c("div", { staticClass: "mb-5 mt-1 text-center" }, [
                 _c("span", { staticClass: "loading" })
               ])
-            : _vm._e()
+            : _vm._e(),
+          _vm._v(" "),
+          _c("back-link")
         ],
         1
       )
@@ -4058,6 +4116,18 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "alert alert-success" }, [
       _c("p", [_vm._v("Задача успешно делегирована!")]),
+      _vm._v(" "),
+      _c("p", { staticClass: "small mb-0" }, [
+        _vm._v("Через 3 секунды вернёмся к списку задач.")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "alert alert-success" }, [
+      _c("p", [_vm._v("Задача успешно удалена!")]),
       _vm._v(" "),
       _c("p", { staticClass: "small mb-0" }, [
         _vm._v("Через 3 секунды вернёмся к списку задач.")
@@ -17929,6 +17999,11 @@ function managePanels(that) {
     case "todo-edit":
       that.$store.commit('setActivePanel', 'todo');
       that.$store.commit('setLastActivePanel', 'todo-edit');
+      break;
+
+    case "todo-add":
+      that.$store.commit('setActivePanel', 'home');
+      that.$store.commit('setLastActivePanel', 'todo-add');
       break;
   }
 }

@@ -9,6 +9,7 @@ Route::middleware('api')->group(function () {
 
         Route::post('add', 'Api\TodoController@addTodo');
         Route::patch('edit', 'Api\TodoController@editTodo');
+        Route::delete('delete', 'Api\TodoController@deleteTodo');
     });
 
     Route::group(['prefix' => 'users'], function (){

@@ -2,7 +2,7 @@
     <div>
         <div class="row mb-4">
             <div class="col todo-item-list">
-                <div v-if="! is_delegated">
+                <div v-if="! is_delegated && ! is_deleted">
                     <h5>{{ this.todo.title }}</h5>
 
                     <p class="text-muted mb-0">Описание задачи:</p>
@@ -29,6 +29,10 @@
                         Редактировать задачу
                     </button>
 
+                    <button class="btn btn-danger btn-block mt-3" @click="deleteTodo" v-if="! deletedLoading">
+                        Удалить задачу
+                    </button>
+
                 </div>
 
                 <div v-if="is_delegated">
@@ -38,11 +42,18 @@
                     </div>
                 </div>
 
-                <back-link></back-link>
+                <div v-if="is_deleted">
+                    <div class="alert alert-success">
+                        <p>Задача успешно удалена!</p>
+                        <p class="small mb-0">Через 3 секунды вернёмся к списку задач.</p>
+                    </div>
+                </div>
 
-                <div class="mb-5 mt-1 text-center" v-if="userLoading">
+                <div class="mb-5 mt-1 text-center" v-if="userLoading || deletedLoading">
                     <span class="loading"></span>
                 </div>
+
+                <back-link></back-link>
 
             </div>
         </div>
@@ -62,7 +73,10 @@
                 users: [],
 
                 userLoading: false,
-                is_delegated: false
+                deletedLoading: false,
+
+                is_delegated: false,
+                is_deleted: false
             }
         },
         mounted() {
@@ -117,6 +131,37 @@
                         this.userLoading = false;
 
                         if (is_delegated) {
+                            setTimeout(() => {
+                                this.$store.commit('setLastActivePanel', 'todo');
+                                this.$store.commit('setActivePanel', 'home');
+                            }, 3000);
+                        }
+
+                    }))
+                    .catch(error => {
+                        console.log('Error: ', error);
+                    });
+            },
+
+            deleteTodo() {
+                let endpoint = '/api/todos/delete';
+                let token = document.querySelector('meta[name="api-token"]').getAttribute('content');
+                let data = {
+                    'api_token': token,
+                    'todo_id': this.$store.state.todo.id,
+                };
+
+                this.deletedLoading = true;
+
+                axios.delete(endpoint, {
+                    params: data
+                })
+                    .then((result => {
+                        let is_deleted = result['data']['response']['is_deleted'];
+                        this.is_deleted = !!is_deleted;
+                        this.deletedLoading = false;
+
+                        if (is_deleted) {
                             setTimeout(() => {
                                 this.$store.commit('setLastActivePanel', 'todo');
                                 this.$store.commit('setActivePanel', 'home');

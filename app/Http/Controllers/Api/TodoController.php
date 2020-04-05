@@ -117,6 +117,8 @@ class TodoController extends ApiController
             return $this->respondNotFound('User has not been found!');
         }
 
+
+
         $todo = $this->todoRepo->getById($todoId);
 
         if (!$todo) {
@@ -186,7 +188,6 @@ class TodoController extends ApiController
         ]);
     }
 
-
     /**
      * @param  Request  $request
      * @return JsonResponse
@@ -199,7 +200,7 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $todoId = (int) filter_var($input['todoId'], FILTER_SANITIZE_NUMBER_INT);
+        $todoId = (int) filter_var($input['todo_id'], FILTER_SANITIZE_NUMBER_INT);
         $title = filter_var($input['title'], FILTER_SANITIZE_STRING);
         $description = filter_var($input['description'], FILTER_SANITIZE_STRING);
         $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
@@ -244,5 +245,48 @@ class TodoController extends ApiController
             ]
         ]);
     }
+
+    /**
+     * @param  Request  $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function deleteTodo(Request $request)
+    {
+        $input = $request->all();
+
+        if (!$input) {
+            return $this->respondBadRequest();
+        }
+
+        $todoId = (int) filter_var($input['todo_id'], FILTER_SANITIZE_NUMBER_INT);
+        $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
+
+        if (!$token) {
+            return $this->respondUnauthorized();
+        }
+
+        $user = $this->userRepo->getByField('api_token', $token);
+
+        if (!$user) {
+            return $this->respondNotFound('User has not been found!');
+        }
+
+        $todo = $this->todoRepo->getById($todoId);
+
+        if (!$todo) {
+            return $this->respondNotFound('Todo has not been found!');
+        }
+
+        $isDeleted = $this->todoService->delete($todo);
+
+        return $this->respond([
+            'response' => [
+                'is_deleted' => $isDeleted,
+            ]
+        ]);
+    }
+
+
 
 }

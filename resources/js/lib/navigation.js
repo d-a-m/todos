@@ -11,5 +11,11 @@ export function managePanels(that) {
             that.$store.commit('setLastActivePanel', 'todo-edit');
 
             break;
+
+        case "todo-add":
+            that.$store.commit('setActivePanel', 'home');
+            that.$store.commit('setLastActivePanel', 'todo-add');
+
+            break;
     }
 }

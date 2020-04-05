@@ -64,7 +64,7 @@
                     'api_token': token,
                     'title': title,
                     'description': description,
-                    'todoId': this.todo.id,
+                    'todo_id': this.todo.id,
                 };
 
                 this.loading = true;
