@@ -3,25 +3,22 @@
 namespace App\Repositories\Factory;
 
 use App\Repositories\Contract\Repository;
-use Illuminate\Database\Eloquent\Model;
 
 class RepositoryFactory
 {
     /**
-     * @param Model $model
-     * @return Repository
+     * @param string $modelName
+     * @return Repository|null
      */
-    public static function make(Model $model): ?Repository
+    public static function make(string $modelName): ?Repository
     {
-        $model = get_class($model);
-
-        $classNamespace = explode('\\', $model);
+        $classNamespace = explode('\\', $modelName);
         $className = end($classNamespace);
 
         $repositoryName = 'App\Repositories\\' . $className . 'Repository';
 
         try {
-            $repository = new $repositoryName($model);
+            $repository = new $repositoryName($modelName);
         } catch (\Exception $e) {
             return null;
         }

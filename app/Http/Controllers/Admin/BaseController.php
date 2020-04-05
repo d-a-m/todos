@@ -23,12 +23,12 @@ class BaseController extends Controller
     /**
      * @var Repository
      */
-    private $repository;
+    protected $repository;
 
     /**
      * @var Service
      */
-    private $service;
+    protected $service;
 
     /**
      * @var Model
@@ -47,17 +47,17 @@ class BaseController extends Controller
 
     /**
      * BaseController constructor.
-     * @param Model $model
+     * @param string $modelName
      * @param array $titles
      * @param string $view
      */
-    public function __construct(Model $model, array $titles, string $view)
+    public function __construct(string $modelName, array $titles, string $view)
     {
-        $this->model = $model;
+        $this->model = new $modelName();
         $this->titles = $titles;
         $this->view = $view;
-        $this->repository = RepositoryFactory::make($model);
-        $this->service = ServiceFactory::make($model, $this->repository);
+        $this->repository = RepositoryFactory::make($modelName);
+        $this->service = ServiceFactory::make($modelName, $this->repository);
     }
 
     /**
@@ -106,10 +106,10 @@ class BaseController extends Controller
 
     /**
      * @param int $id
-     * @param array $additionalParams
+     * @param array|null $additionalParams
      * @return Factory|View
      */
-    public function edit(int $id, array $additionalParams = [])
+    public function edit(int $id, ?array $additionalParams = [])
     {
         if (!$id) {
             abort(404);

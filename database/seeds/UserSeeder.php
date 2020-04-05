@@ -15,12 +15,19 @@ class UserSeeder extends Seeder
     public function run()
     {
         DB::table('todos')->truncate();
-        DB::table('todo_user')->truncate();
         DB::table('transferred_todo')->truncate();
 
         $faker = Faker\Factory::create();
 
-        foreach (range(0, 3) as $i) {
+        $user = User::create([
+            'name' => 'Administrator',
+            'email' => 'admin@admin.com',
+            'password' => bcrypt('12345'),
+            'api_token' => Str::random(60),
+            'is_admin' => true,
+        ]);
+
+        for ($i = 0; $i < 5; $i++) {
             $user = User::create([
                 'name' => $faker->name,
                 'email' => $faker->email,

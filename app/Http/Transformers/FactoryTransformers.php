@@ -16,11 +16,11 @@ class FactoryTransformers
         $transformer = null;
 
         switch ($type) {
-            case 'category':
-                $transformer = new CategoryTransformer();
+            case 'todo':
+                $transformer = new TodoTransformer();
                 break;
-            case 'word':
-                $transformer = new WordTransformer();
+            case 'user':
+                $transformer = new UserTransformer();
                 break;
             default:
                 throw new \Exception('Unknown transformer type - ' . $type);

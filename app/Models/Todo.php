@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\DB;
 class Todo extends Model
 {
     /**
-     * @var array
-     */
-    protected $guarded = ['id', 'created_at', 'updated_at'];
-
-    /**
      * Массив с дежурными сообщениями о результате выполненной операции
      * @var array
      */
@@ -27,11 +22,16 @@ class Todo extends Model
     ];
 
     /**
+     * @var array
+     */
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
+    /**
      * @return BelongsTo
      */
-    public function user()
+    public function author()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

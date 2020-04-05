@@ -4,9 +4,9 @@
 namespace App\Api\Transformers;
 
 
-class DepositTransformer extends Transformer
+class TodoTransformer extends Transformer
 {
-    private $except = ['updated_at', 'created_at', 'sravni_id'];
+    private $except = [];
 
     /**
      * @param $item
@@ -14,6 +14,10 @@ class DepositTransformer extends Transformer
      */
     public function transform($item) : array
     {
+        if (! is_array($item)) {
+            $item = $item->toArray();
+        }
+
         $filtered = array_filter($item, function($key){
             return ! in_array($key, $this->except);
         }, ARRAY_FILTER_USE_KEY);

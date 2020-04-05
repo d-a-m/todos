@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -32,10 +31,23 @@ class User extends Authenticatable
     ];
 
     /**
-     * @return BelongsToMany'
+     * Массив с дежурными сообщениями о результате выполненной операции
+     * @var array
+     */
+    public static $alerts = [
+        'success_create' => 'Пользователь успешно добавлен!',
+        'error_create' => 'Пользователь не был добавлен!',
+        'success_update' => 'Пользователь успешно отредактирован!',
+        'error_update' => 'Пользователь не был отредактирован!',
+        'success_destroy' => 'Пользователь успешно удалён!',
+        'error_destroy' => 'Пользователь не был удалён!',
+    ];
+
+    /**
+     * @return HasMany
      */
     public function todos()
     {
-        return $this->belongsToMany(Todo::class);
+        return $this->hasMany(Todo::class);
     }
 }

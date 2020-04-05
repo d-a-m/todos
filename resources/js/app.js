@@ -24,7 +24,7 @@ import {store} from './store';
  */
 
 const app = new Vue({
-    el: root,
+    el: '#app',
     components: { App },
     store,
     computed: {

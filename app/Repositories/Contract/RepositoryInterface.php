@@ -6,30 +6,16 @@ namespace App\Repositories\Contract;
 interface RepositoryInterface
 {
     /**
-     * @param int $id
-     * @param array $fields
+     * @param $id
+     * @param array|null $fields
      * @return mixed
      */
-    public function getById(int $id, array $fields=[]);
+    public function getById($id, ?array $fields = []);
+
 
     /**
-     * @param array $fields
      * @return mixed
      */
-    public function getAll(array $fields=[]);
+    public function getAll();
 
-    /**
-     * @param int $id
-     * @param string $cacheKey
-     * @return mixed
-     */
-    public function getCachedById(int $id, string $cacheKey);
-
-    /**
-     * @param string $cacheKey
-     * @param string $orderField
-     * @param string $orderType
-     * @return mixed
-     */
-    public function getAllCached(string $cacheKey, string $orderField = 'rating', string $orderType = 'desc');
 }

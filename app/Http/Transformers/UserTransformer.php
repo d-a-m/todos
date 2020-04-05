@@ -4,10 +4,9 @@
 namespace App\Api\Transformers;
 
 
-class CategoryTransformer extends Transformer
+class UserTransformer extends Transformer
 {
-
-    private $except = ['updated_at', 'created_at', 'price'];
+    private $except = [];
 
     /**
      * @param $item
@@ -15,8 +14,12 @@ class CategoryTransformer extends Transformer
      */
     public function transform($item) : array
     {
+        if (! is_array($item)) {
+            $item = $item->toArray();
+        }
+
         $filtered = array_filter($item, function($key){
-           return ! in_array($key, $this->except);
+            return ! in_array($key, $this->except);
         }, ARRAY_FILTER_USE_KEY);
 
         return $filtered;

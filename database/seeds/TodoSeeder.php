@@ -15,20 +15,19 @@ class TodoSeeder extends Seeder
     public function run()
     {
         DB::table('todos')->truncate();
-        DB::table('todo_user')->truncate();
         DB::table('transferred_todo')->truncate();
 
         $faker = Faker\Factory::create();
         $users = User::all();
 
         foreach (range(0, 10) as $i) {
-            $todo = Todo::create([
-               'title' => $faker->title,
-                'description' => $faker->realText(100),
-            ]);
-
             $user = $users->random();
-            $user->todos()->attach($todo);
+
+            $todo = Todo::create([
+                'title' => $faker->realText(20),
+                'description' => $faker->realText(100),
+                'user_id' => $user->id,
+            ]);
 
             if (rand(0, 10) < 5) {
                 DB::table('transferred_todo')

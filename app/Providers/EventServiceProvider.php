@@ -4,9 +4,12 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Models\Progress;
+use App\Models\Todo;
+use App\Models\User;
 use App\Models\Word;
 use App\Observers\CategoryObserver;
 use App\Observers\ProgressObserver;
+use App\Observers\UserObserver;
 use App\Observers\WordObserver;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -30,5 +33,6 @@ class EventServiceProvider extends ServiceProvider
     {
         parent::boot();
 
+        User::observe(UserObserver::class);
     }
 }

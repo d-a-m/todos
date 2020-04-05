@@ -56,6 +56,15 @@ class ApiController extends Controller
     }
 
     /**
+     * @param string $message
+     * @return JsonResponse
+     */
+    public function respondUnauthorized ($message = 'Unauthorized')
+    {
+        return $this->setStatusCode(401)->respondWithError($message);
+    }
+
+    /**
      * @param $message
      * @return JsonResponse
      */

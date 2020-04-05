@@ -9,19 +9,17 @@ use Illuminate\Database\Eloquent\Model;
 class ServiceFactory
 {
     /**
-     * @param Model $model
+     * @param string $modelName
      * @param Repository $repository
      * @return Service
      */
-    public static function make(Model $model, Repository $repository): Service
+    public static function make(string $modelName, Repository $repository): Service
     {
-        $modelName = get_class($model);
-
         $classNamespace = explode('\\', $modelName);
         $className = end($classNamespace);
 
         $serviceName = 'App\Services\\' . $className . 'Service';
-        $service = new $serviceName($model, $repository);
+        $service = new $serviceName($modelName, $repository);
 
         return $service;
     }

@@ -4,6 +4,7 @@ namespace App\Servives\Contract;
 
 use App\Repositories\Contract\Repository;
 use App\Services\Contract\ServiceInterface;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
@@ -21,17 +22,17 @@ abstract class Service implements ServiceInterface
 
     /**
      * Service constructor.
-     * @param Model $model
-     * @param Repository $repository
+     * @param  string  $modelName
+     * @param  Repository  $repository
      */
-    public function __construct(Model $model, Repository $repository)
+    public function __construct(string $modelName, Repository $repository)
     {
-        $this->model = $model;
+        $this->model = new $modelName();
         $this->repository = $repository;
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      * @return bool|mixed
      */
     public function create(Request $request)
@@ -46,8 +47,8 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * @param Request $request
-     * @param Model $model
+     * @param  Request  $request
+     * @param  Model  $model
      * @return bool|Model|mixed
      */
     public function update(Request $request, Model $model)
@@ -62,9 +63,9 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * @param Model $model
+     * @param  Model  $model
      * @return bool|mixed|null
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete(Model $model)
     {
