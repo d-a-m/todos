@@ -23,15 +23,6 @@ class TodoController extends BaseController
     }
 
     /**
-     * @param  array  $additionalParams
-     * @return View
-     */
-    public function create(array $additionalParams = [])
-    {
-        return parent::create();
-    }
-
-    /**
      * @param  int  $id
      * @param  array|null  $additionalParams
      * @return Factory|View
@@ -46,16 +37,6 @@ class TodoController extends BaseController
         $additionalParams['author'] = $model->author;
 
         return parent::edit($id, $additionalParams);
-    }
-
-
-    /**
-     * @param  TodoRequest  $request
-     * @return RedirectResponse|Redirector
-     */
-    public function store(TodoRequest $request)
-    {
-        return parent::_store($request);
     }
 
     /**

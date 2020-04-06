@@ -157,6 +157,7 @@
                     params: data
                 })
                     .then((result => {
+
                         let is_deleted = result['data']['response']['is_deleted'];
                         this.is_deleted = !!is_deleted;
                         this.deletedLoading = false;

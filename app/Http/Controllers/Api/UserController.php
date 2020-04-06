@@ -43,7 +43,7 @@ class UserController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
+        $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
             return $this->respondUnauthorized();

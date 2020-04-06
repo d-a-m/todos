@@ -4,9 +4,7 @@ namespace App\Servives\Contract;
 
 use App\Repositories\Contract\Repository;
 use App\Services\Contract\ServiceInterface;
-use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 
 abstract class Service implements ServiceInterface
 {
@@ -32,12 +30,12 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * @param  Request  $request
+     * @param  array  $data
      * @return bool|mixed
      */
-    public function create(Request $request)
+    public function create(array $data)
     {
-        $model = $this->model::create($request->all());
+        $model = $this->model::create($data);
 
         if ($model) {
             return $model;
@@ -47,13 +45,13 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * @param  Request  $request
-     * @param  Model  $model
-     * @return bool|Model|mixed
+     * @param  array  $data
+     * @param $model
+     * @return bool|mixed
      */
-    public function update(Request $request, Model $model)
+    public function update(array $data, $model)
     {
-        $model = $model->update($request->all());
+        $model = $model->update($data);
 
         if ($model) {
             return $model;
@@ -63,11 +61,10 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * @param  Model  $model
-     * @return bool|mixed|null
-     * @throws Exception
+     * @param $model
+     * @return mixed
      */
-    public function delete(Model $model)
+    public function delete($model)
     {
         return $model->delete();
     }

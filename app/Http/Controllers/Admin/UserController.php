@@ -23,14 +23,6 @@ class UserController extends BaseController
         ], 'user');
     }
 
-    /**
-     * @param  array  $additionalParams
-     * @return View
-     */
-    public function create(array $additionalParams = [])
-    {
-        return parent::create();
-    }
 
     /**
      * @param  int  $id

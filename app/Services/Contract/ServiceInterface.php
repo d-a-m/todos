@@ -12,21 +12,21 @@ use Illuminate\Http\Request;
 interface ServiceInterface
 {
     /**
-     * @param Request $request
+     * @param  array  $data
      * @return mixed
      */
-    public function create(Request $request);
+    public function create(array $data);
+
+     /**
+     * @param  array  $data
+     * @param $model
+     * @return mixed
+     */
+    public function update(array $data, $model);
 
     /**
-     * @param $request
-     * @param Model $model
+     * @param $model
      * @return mixed
      */
-    public function update(Request $request, Model $model);
-
-    /**
-     * @param Model $model
-     * @return mixed
-     */
-    public function delete(Model $model);
+    public function delete($model);
 }

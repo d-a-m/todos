@@ -13,7 +13,6 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use phpDocumentor\Reflection\Types\Boolean;
 
 /**
  * Class WordController
@@ -61,9 +60,9 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $page = (int) filter_var($input['page'], FILTER_SANITIZE_NUMBER_INT);
-        $perPage = (int) filter_var($input['perPage'], FILTER_SANITIZE_NUMBER_INT);
-        $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
+        $page = (int) filter_var($input['page'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $perPage = (int) filter_var($input['perPage'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
             return $this->respondUnauthorized();
@@ -103,9 +102,9 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $userToId = (int) filter_var($input['user_to'], FILTER_SANITIZE_NUMBER_INT);
-        $todoId = (int) filter_var($input['todo_id'], FILTER_SANITIZE_NUMBER_INT);
-        $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
+        $userToId = (int) filter_var($input['user_to'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $todoId = (int) filter_var($input['todo_id'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
             return $this->respondUnauthorized();
@@ -124,19 +123,29 @@ class TodoController extends ApiController
             return $this->respondNotFound('Todo has not been found!');
         }
 
-        if (!$this->isAllowOperation($todo, $user)) {
+        if (!$this->isAllowOperation($user, $todo)) {
             return $this->respondBadRequest();
         }
 
-        $isDelegated = $this->todoService->_update($todo, [
+        $isDelegated = $this->todoService->update([
             'user_id' => $userToId,
-        ]);
+        ], $todo);
 
         return $this->respond([
             'response' => [
                 'is_delegated' => $isDelegated,
             ]
         ]);
+    }
+
+    /**
+     * @param  User  $user
+     * @param  Todo  $todo
+     * @return bool
+     */
+    private function isAllowOperation(User $user, Todo $todo): bool
+    {
+        return $user->id === $todo->user_id ? true : false;
     }
 
     /**
@@ -151,9 +160,9 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $title = filter_var($input['title'], FILTER_SANITIZE_STRING);
-        $description = filter_var($input['description'], FILTER_SANITIZE_STRING);
-        $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
+        $title = filter_var($input['title'] ?? '', FILTER_SANITIZE_STRING);
+        $description = filter_var($input['description'] ?? '', FILTER_SANITIZE_STRING);
+        $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
             return $this->respondUnauthorized();
@@ -175,9 +184,9 @@ class TodoController extends ApiController
 
         if (!$validator->fails()) {
 
-            $isAdded = $this->todoService->_create($params);
+            $isAdded = $this->todoService->create($params);
 
-            return $this->respond([
+            return $this->setStatusCode(201)->respond([
                 'response' => [
                     'is_added' => $isAdded,
                 ]
@@ -203,10 +212,10 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $todoId = (int) filter_var($input['todo_id'], FILTER_SANITIZE_NUMBER_INT);
-        $title = filter_var($input['title'], FILTER_SANITIZE_STRING);
-        $description = filter_var($input['description'], FILTER_SANITIZE_STRING);
-        $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
+        $todoId = (int) filter_var($input['todo_id'] ?? 0, FILTER_SANITIZE_NUMBER_INT);
+        $title = filter_var($input['title'] ?? '', FILTER_SANITIZE_STRING);
+        $description = filter_var($input['description'] ?? '', FILTER_SANITIZE_STRING);
+        $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
             return $this->respondUnauthorized();
@@ -224,7 +233,7 @@ class TodoController extends ApiController
             return $this->respondNotFound('Todo has not been found!');
         }
 
-        if (!$this->isAllowOperation($todo, $user)) {
+        if (!$this->isAllowOperation($user, $todo)) {
             return $this->respondBadRequest();
         }
 
@@ -237,7 +246,7 @@ class TodoController extends ApiController
 
         if (!$validator->fails()) {
 
-            $isEdited = $this->todoService->_update($todo, $params);
+            $isEdited = $this->todoService->update($params, $todo);
 
             return $this->respond([
                 'response' => [
@@ -266,8 +275,8 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $todoId = (int) filter_var($input['todo_id'], FILTER_SANITIZE_NUMBER_INT);
-        $token = filter_var($input['api_token'], FILTER_SANITIZE_STRING);
+        $todoId = (int) filter_var($input['todo_id'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
             return $this->respondUnauthorized();
@@ -285,7 +294,7 @@ class TodoController extends ApiController
             return $this->respondNotFound('Todo has not been found!');
         }
 
-        if (!$this->isAllowOperation($todo, $user)) {
+        if (!$this->isAllowOperation($user, $todo)) {
             return $this->respondBadRequest();
         }
 
@@ -296,16 +305,6 @@ class TodoController extends ApiController
                 'is_deleted' => $isDeleted,
             ]
         ]);
-    }
-
-    /**
-     * @param  User  $user
-     * @param  Todo  $todo
-     * @return bool
-     */
-    private function isAllowOperation(User $user, Todo $todo): Boolean
-    {
-        return $user->id === $todo->user_id ? true : false;
     }
 
 }

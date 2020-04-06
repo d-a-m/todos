@@ -94,7 +94,7 @@ class BaseController extends Controller
      */
     public function _store($request)
     {
-        $created = $this->service->create($request);
+        $created = $this->service->create($request->all());
 
         if ($created) {
             return redirect("admin/{$this->view}")
@@ -137,7 +137,7 @@ class BaseController extends Controller
         }
 
         $model = $this->repository->getById($id);
-        $updates = $this->service->update($request, $model);
+        $updates = $this->service->update($request->all(), $model);
 
         if ($updates) {
             return redirect("admin/{$this->view}")
