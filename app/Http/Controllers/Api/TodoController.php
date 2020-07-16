@@ -8,19 +8,15 @@ use App\Models\Todo;
 use App\Models\User;
 use App\Repositories\Contract\Repository;
 use App\Repositories\Factory\RepositoryFactory;
-use App\Services\TodoService;
+use App\Services\Admin\CRUDService;
+use App\Services\Models\TodoService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * Class WordController
- * @package App\Http\Controllers\Api
- */
 class TodoController extends ApiController
 {
-
     /**
      * @var Repository
      */
@@ -34,7 +30,7 @@ class TodoController extends ApiController
     /**
      * @var TodoService
      */
-    private $todoService;
+    protected $service;
 
     /**
      * TodoController constructor.
@@ -44,11 +40,11 @@ class TodoController extends ApiController
         $this->userRepo = RepositoryFactory::make(User::class);
         $this->todoRepo = RepositoryFactory::make(Todo::class);
 
-        $this->todoService = new TodoService(Todo::class, $this->todoRepo);
+        $this->service = new TodoService();
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
@@ -60,8 +56,8 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $page = (int) filter_var($input['page'] ?? '', FILTER_SANITIZE_NUMBER_INT);
-        $perPage = (int) filter_var($input['perPage'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $page = (int)filter_var($input['page'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $perPage = (int)filter_var($input['perPage'] ?? '', FILTER_SANITIZE_NUMBER_INT);
         $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
@@ -74,7 +70,7 @@ class TodoController extends ApiController
             return $this->respondNotFound('User has not been found!');
         }
 
-        $todos = $user->todos();
+        $todos = $user->todos()->orderBy('id', 'desc');
         $page = $page ?: 1;
         $skip = $page ? $perPage * ($page - 1) : 0;
         $rawItems = $todos->take($perPage)->skip($skip)->get()->toArray();
@@ -89,9 +85,8 @@ class TodoController extends ApiController
         ]);
     }
 
-
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      */
     public function delegateTodo(Request $request)
@@ -102,8 +97,8 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $userToId = (int) filter_var($input['user_to'] ?? '', FILTER_SANITIZE_NUMBER_INT);
-        $todoId = (int) filter_var($input['todo_id'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $userToId = (int)filter_var($input['user_to'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $todoId = (int)filter_var($input['todo_id'] ?? '', FILTER_SANITIZE_NUMBER_INT);
         $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
@@ -127,7 +122,7 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $isDelegated = $this->todoService->update([
+        $isDelegated = $this->service->update([
             'user_id' => $userToId,
         ], $todo);
 
@@ -139,17 +134,17 @@ class TodoController extends ApiController
     }
 
     /**
-     * @param  User  $user
-     * @param  Todo  $todo
+     * @param User $user
+     * @param Todo $todo
      * @return bool
      */
     private function isAllowOperation(User $user, Todo $todo): bool
     {
-        return $user->id === $todo->user_id ? true : false;
+        return $user->id === $todo->user_id;
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      */
     public function addTodo(Request $request)
@@ -184,7 +179,7 @@ class TodoController extends ApiController
 
         if (!$validator->fails()) {
 
-            $isAdded = $this->todoService->create($params);
+            $isAdded = $this->service->store($params);
 
             return $this->setStatusCode(201)->respond([
                 'response' => [
@@ -201,7 +196,7 @@ class TodoController extends ApiController
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      */
     public function editTodo(Request $request)
@@ -212,7 +207,7 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $todoId = (int) filter_var($input['todo_id'] ?? 0, FILTER_SANITIZE_NUMBER_INT);
+        $todoId = (int)filter_var($input['todo_id'] ?? 0, FILTER_SANITIZE_NUMBER_INT);
         $title = filter_var($input['title'] ?? '', FILTER_SANITIZE_STRING);
         $description = filter_var($input['description'] ?? '', FILTER_SANITIZE_STRING);
         $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
@@ -246,7 +241,7 @@ class TodoController extends ApiController
 
         if (!$validator->fails()) {
 
-            $isEdited = $this->todoService->update($params, $todo);
+            $isEdited = $this->service->update($params, $todo);
 
             return $this->respond([
                 'response' => [
@@ -263,7 +258,7 @@ class TodoController extends ApiController
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
@@ -275,7 +270,7 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $todoId = (int) filter_var($input['todo_id'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $todoId = (int)filter_var($input['todo_id'] ?? '', FILTER_SANITIZE_NUMBER_INT);
         $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
@@ -298,7 +293,7 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $isDeleted = $this->todoService->delete($todo);
+        $isDeleted = $this->service->delete($todo);
 
         return $this->respond([
             'response' => [
