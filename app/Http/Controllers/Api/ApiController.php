@@ -1,10 +1,7 @@
 <?php
 
-
 namespace App\Http\Controllers\Api;
 
-
-use App\Helpers\SecureHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Response;
@@ -24,7 +21,6 @@ class ApiController extends Controller
     {
         return $this->statusCode;
     }
-
 
     /**
      * @param $statusCode
@@ -107,26 +103,4 @@ class ApiController extends Controller
 
         return $rawQuery->get();
     }
-
-
-    /**
-     * @param string $url
-     * @param int $userVkId
-     * @return bool
-     */
-    protected function checkUser(string $url, int $userVkId)
-    {
-        if (!$url || !$userVkId) {
-            return false;
-        }
-
-        $isTrueSign = SecureHelper::checkUserSign($url, $userVkId);
-
-        if ($isTrueSign === false) {
-            return false;
-        }
-
-        return true;
-    }
-
 }

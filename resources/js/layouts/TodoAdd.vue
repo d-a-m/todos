@@ -67,7 +67,6 @@
                     .then((result => {
                         let is_added = result['data']['response']['is_added'];
                         this.is_added = !!is_added;
-                        this.loading = false;
 
                         if (is_added) {
                             setTimeout(() => {
@@ -76,9 +75,10 @@
                             }, 3000);
                         }
 
-                    }))
-                    .catch(error => {
+                    })).catch(error => {
                         console.log('Error: ', error);
+                    }).finally(() => {
+                        this.loading = false;
                     });
             }
         }

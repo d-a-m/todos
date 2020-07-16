@@ -2073,7 +2073,6 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_0___default.a.post(endpoint, data).then(function (result) {
         var is_added = result['data']['response']['is_added'];
         _this.is_added = !!is_added;
-        _this.loading = false;
 
         if (is_added) {
           setTimeout(function () {
@@ -2084,6 +2083,8 @@ __webpack_require__.r(__webpack_exports__);
         }
       })["catch"](function (error) {
         console.log('Error: ', error);
+      })["finally"](function () {
+        _this.loading = false;
       });
     }
   }
@@ -2174,7 +2175,6 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_0___default.a.patch(endpoint, data).then(function (result) {
         var is_edited = result['data']['response']['is_edited'];
         _this.is_edited = !!is_edited;
-        _this.loading = false;
 
         if (is_edited) {
           setTimeout(function () {
@@ -2185,6 +2185,8 @@ __webpack_require__.r(__webpack_exports__);
         }
       })["catch"](function (error) {
         console.log('Error: ', error);
+      })["finally"](function () {
+        _this.loading = false;
       });
     }
   }
