@@ -31,6 +31,10 @@ class TodoAddRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException($this->respondBadRequest());
+        throw new HttpResponseException(
+            $this
+                ->setStatusCode(400)
+                ->respondBadRequest()
+        );
     }
 }

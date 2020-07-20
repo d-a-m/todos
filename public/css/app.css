@@ -11513,20 +11513,17 @@ h1 > span {
 .btn-default {
   color: #333;
   background-color: #eeeeee;
-  border: 5px solid #eeeeee;
 }
 
 @media screen and (min-width: 601px) {
   .btn-default:hover {
     background-color: #e0e0e0 !important;
-    border: 5px solid #e0e0e0 !important;
   }
 }
 
 @media screen and (max-width: 600px) {
   .btn-default:active {
     background-color: #e0e0e0 !important;
-    border: 5px solid #e0e0e0 !important;
   }
 }
 

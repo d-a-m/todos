@@ -9,14 +9,13 @@ class TodoTest extends TestCase
 {
     public function test_can_add_todo_without_token()
     {
-
         $data = [
             'title' => $this->faker->sentence,
             'description' => $this->faker->sentence,
         ];
 
         $this->post(route('todo.add'), $data)
-            ->assertStatus(401);
+            ->assertStatus(400);
     }
 
     public function test_can_add_todo_with_token()
@@ -44,7 +43,7 @@ class TodoTest extends TestCase
         ];
 
         $this->patch(route('todo.edit', $todo->id), $data)
-            ->assertStatus(401);
+            ->assertStatus(400);
     }
 
     public function test_can_edit_todo_with_token()
@@ -67,7 +66,7 @@ class TodoTest extends TestCase
         $todo = factory(Todo::class)->create();
 
         $this->delete(route('todo.delete', $todo->id))
-            ->assertStatus(401);
+            ->assertStatus(400);
     }
 
     public function test_can_delete_todo_with_token() {
