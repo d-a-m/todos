@@ -3,24 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Api\Transformers\FactoryTransformers;
+use App\Http\Requests\Api\TodoAddRequest;
+use App\Http\Requests\Api\TodoDeleteRequest;
+use App\Http\Requests\Api\TodoEditRequest;
 use App\Http\Requests\TodoRequest;
 use App\Models\Todo;
 use App\Models\User;
 use App\Repositories\Contract\Repository;
 use App\Repositories\Factory\RepositoryFactory;
-use App\Services\TodoService;
+use App\Services\Admin\CRUDService;
+use App\Services\Models\TodoService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * Class WordController
- * @package App\Http\Controllers\Api
- */
 class TodoController extends ApiController
 {
-
     /**
      * @var Repository
      */
@@ -34,7 +33,7 @@ class TodoController extends ApiController
     /**
      * @var TodoService
      */
-    private $todoService;
+    protected $service;
 
     /**
      * TodoController constructor.
@@ -44,11 +43,11 @@ class TodoController extends ApiController
         $this->userRepo = RepositoryFactory::make(User::class);
         $this->todoRepo = RepositoryFactory::make(Todo::class);
 
-        $this->todoService = new TodoService(Todo::class, $this->todoRepo);
+        $this->service = new TodoService();
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
@@ -60,8 +59,8 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $page = (int) filter_var($input['page'] ?? '', FILTER_SANITIZE_NUMBER_INT);
-        $perPage = (int) filter_var($input['perPage'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $page = (int)filter_var($input['page'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $perPage = (int)filter_var($input['perPage'] ?? '', FILTER_SANITIZE_NUMBER_INT);
         $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
@@ -74,7 +73,7 @@ class TodoController extends ApiController
             return $this->respondNotFound('User has not been found!');
         }
 
-        $todos = $user->todos();
+        $todos = $user->todos()->orderBy('id', 'desc');
         $page = $page ?: 1;
         $skip = $page ? $perPage * ($page - 1) : 0;
         $rawItems = $todos->take($perPage)->skip($skip)->get()->toArray();
@@ -89,9 +88,8 @@ class TodoController extends ApiController
         ]);
     }
 
-
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      */
     public function delegateTodo(Request $request)
@@ -102,8 +100,8 @@ class TodoController extends ApiController
             return $this->respondBadRequest();
         }
 
-        $userToId = (int) filter_var($input['user_to'] ?? '', FILTER_SANITIZE_NUMBER_INT);
-        $todoId = (int) filter_var($input['todo_id'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $userToId = (int)filter_var($input['user_to'] ?? '', FILTER_SANITIZE_NUMBER_INT);
+        $todoId = (int)filter_var($input['todo_id'] ?? '', FILTER_SANITIZE_NUMBER_INT);
         $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
@@ -123,11 +121,11 @@ class TodoController extends ApiController
             return $this->respondNotFound('Todo has not been found!');
         }
 
-        if (!$this->isAllowOperation($user, $todo)) {
+        if ($user->cannot('update', $todo)) {
             return $this->respondBadRequest();
         }
 
-        $isDelegated = $this->todoService->update([
+        $isDelegated = $this->service->update([
             'user_id' => $userToId,
         ], $todo);
 
@@ -139,38 +137,22 @@ class TodoController extends ApiController
     }
 
     /**
-     * @param  User  $user
-     * @param  Todo  $todo
-     * @return bool
-     */
-    private function isAllowOperation(User $user, Todo $todo): bool
-    {
-        return $user->id === $todo->user_id ? true : false;
-    }
-
-    /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      */
-    public function addTodo(Request $request)
+    public function addTodo(TodoAddRequest $request)
     {
-        $input = $request->all();
+        $title = filter_var($request->get('title') ?? '', FILTER_SANITIZE_STRING);
+        $description = filter_var($request->get('description') ?? '', FILTER_SANITIZE_STRING);
+        $token = filter_var($request->get('api_token') ?? '', FILTER_SANITIZE_STRING);
 
-        if (!$input) {
-            return $this->respondBadRequest();
-        }
-
-        $title = filter_var($input['title'] ?? '', FILTER_SANITIZE_STRING);
-        $description = filter_var($input['description'] ?? '', FILTER_SANITIZE_STRING);
-        $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
-
-        if (!$token) {
+        if (! $token) {
             return $this->respondUnauthorized();
         }
 
         $user = $this->userRepo->getByField('api_token', $token);
 
-        if (!$user) {
+        if (! $user) {
             return $this->respondNotFound('User has not been found!');
         }
 
@@ -180,42 +162,25 @@ class TodoController extends ApiController
             'user_id' => $user->id,
         ];
 
-        $validator = Validator::make($params, (new TodoRequest())->rules());
+        $isAdded = $this->service->store($params);
 
-        if (!$validator->fails()) {
-
-            $isAdded = $this->todoService->create($params);
-
-            return $this->setStatusCode(201)->respond([
-                'response' => [
-                    'is_added' => $isAdded,
-                ]
-            ]);
-        }
-
-        return $this->respond([
+        return $this->setStatusCode(201)->respond([
             'response' => [
-                'is_added' => false,
+                'is_added' => $isAdded,
             ]
         ]);
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      */
-    public function editTodo(Request $request)
+    public function editTodo(TodoEditRequest $request)
     {
-        $input = $request->all();
-
-        if (!$input) {
-            return $this->respondBadRequest();
-        }
-
-        $todoId = (int) filter_var($input['todo_id'] ?? 0, FILTER_SANITIZE_NUMBER_INT);
-        $title = filter_var($input['title'] ?? '', FILTER_SANITIZE_STRING);
-        $description = filter_var($input['description'] ?? '', FILTER_SANITIZE_STRING);
-        $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
+        $todoId = (int)filter_var($request->get('todo_id') ?? 0, FILTER_SANITIZE_NUMBER_INT);
+        $title = filter_var($request->get('title') ?? '', FILTER_SANITIZE_STRING);
+        $description = filter_var($request->get('description') ?? '', FILTER_SANITIZE_STRING);
+        $token = filter_var($request->get('api_token') ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
             return $this->respondUnauthorized();
@@ -233,7 +198,7 @@ class TodoController extends ApiController
             return $this->respondNotFound('Todo has not been found!');
         }
 
-        if (!$this->isAllowOperation($user, $todo)) {
+        if ($user->cannot('update', $todo)) {
             return $this->respondBadRequest();
         }
 
@@ -241,42 +206,24 @@ class TodoController extends ApiController
             'title' => $title,
             'description' => $description,
         ];
-
-        $validator = Validator::make($params, (new TodoRequest())->rules());
-
-        if (!$validator->fails()) {
-
-            $isEdited = $this->todoService->update($params, $todo);
-
-            return $this->respond([
-                'response' => [
-                    'is_edited' => $isEdited,
-                ]
-            ]);
-        }
+        $isEdited = $this->service->update($params, $todo);
 
         return $this->respond([
             'response' => [
-                'is_edited' => false,
+                'is_edited' => $isEdited,
             ]
         ]);
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function deleteTodo(Request $request)
+    public function deleteTodo(TodoDeleteRequest $request)
     {
-        $input = $request->all();
-
-        if (!$input) {
-            return $this->respondBadRequest();
-        }
-
-        $todoId = (int) filter_var($input['todo_id'] ?? '', FILTER_SANITIZE_NUMBER_INT);
-        $token = filter_var($input['api_token'] ?? '', FILTER_SANITIZE_STRING);
+        $todoId = (int)filter_var($request->get('todo_id') ?? 0, FILTER_SANITIZE_NUMBER_INT);
+        $token = filter_var($request->get('api_token') ?? '', FILTER_SANITIZE_STRING);
 
         if (!$token) {
             return $this->respondUnauthorized();
@@ -294,17 +241,14 @@ class TodoController extends ApiController
             return $this->respondNotFound('Todo has not been found!');
         }
 
-        if (!$this->isAllowOperation($user, $todo)) {
+        if ($user->cannot('update', $todo)) {
             return $this->respondBadRequest();
         }
 
-        $isDeleted = $this->todoService->delete($todo);
-
         return $this->respond([
             'response' => [
-                'is_deleted' => $isDeleted,
+                'is_deleted' => $this->service->delete($todo),
             ]
         ]);
     }
-
 }

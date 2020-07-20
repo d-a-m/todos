@@ -73,7 +73,6 @@
                     .then((result => {
                         let is_edited = result['data']['response']['is_edited'];
                         this.is_edited = !!is_edited;
-                        this.loading = false;
 
                         if (is_edited) {
                             setTimeout(() => {
@@ -82,9 +81,10 @@
                             }, 3000);
                         }
 
-                    }))
-                    .catch(error => {
+                    })).catch(error => {
                         console.log('Error: ', error);
+                    }).finally(() => {
+                        this.loading = false;
                     });
             }
         }

@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+namespace App\Http\Traits;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Response;
 
-class ApiController extends Controller
+trait ApiResponseTrait
 {
-
     /**
      * @var int
      */
@@ -21,6 +20,7 @@ class ApiController extends Controller
     {
         return $this->statusCode;
     }
+
 
     /**
      * @param $statusCode
@@ -52,15 +52,6 @@ class ApiController extends Controller
     }
 
     /**
-     * @param string $message
-     * @return JsonResponse
-     */
-    public function respondUnauthorized ($message = 'Unauthorized')
-    {
-        return $this->setStatusCode(401)->respondWithError($message);
-    }
-
-    /**
      * @param $message
      * @return JsonResponse
      */
@@ -82,25 +73,5 @@ class ApiController extends Controller
     public function respond($data, $headers = [])
     {
         return Response::json($data, $this->getStatusCode(), $headers);
-    }
-
-    /**
-     * @param mixed $items
-     * @param int $page
-     * @param int $perPage
-     * @return array
-     */
-    public function getItems($items, int $page, int $perPage)
-    {
-        $page = $page ?: 1;
-
-        if ($page) {
-            $skip = $perPage * ($page - 1);
-            $rawQuery = $items->take($perPage)->skip($skip);
-        } else {
-            $rawQuery = $items->take($perPage)->skip(0);
-        }
-
-        return $rawQuery->get();
     }
 }
