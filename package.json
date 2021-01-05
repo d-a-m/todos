@@ -12,7 +12,7 @@
     "devDependencies": {
         "@vkontakte/mvk-mini-apps-scroll-helper": "^1.2.0",
         "@vkontakte/vk-connect": "^1.6.8",
-        "axios": "^0.19",
+        "axios": "^0.21",
         "bootstrap": "^4.0.0",
         "cross-env": "^5.1",
         "jquery": "^3.2",
